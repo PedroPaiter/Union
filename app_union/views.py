@@ -1,6 +1,8 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from .models import TipoUsuario, Usuario
+import logging
+
 
 def home(request):
   return render(request, 'home.html')
@@ -11,7 +13,7 @@ def cadastrar_usuario(request):
     usuario.nome = request.POST.get('nome')
     usuario.sobrenome = request.POST.get('sobrenome')
     usuario.email = request.POST.get('email')
-    usuario.recebe_notificacao = request.POST.get('recebe_notificacao') == '1'  # Convert to boolean
+    usuario.recebe_notificacao = request.POST.get('recebe_notificacao') != None  # Convert to boolean
     usuario.tipo_usuario = request.POST.get('tipo_usuario')
     usuario.ra = request.POST.get('ra')
     usuario.uc = request.POST.get('uc')
