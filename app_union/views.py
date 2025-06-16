@@ -1,34 +1,51 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render,get_object_or_404
 from .models import TipoUsuario, Usuario
-import logging
-
+from django.urls import reverse
 
 def home(request):
   return render(request, 'home.html')
 
-def cadastrar_usuario(request):
-  if request.method == 'POST':
-    usuario = Usuario()
-    usuario.nome = request.POST.get('nome')
-    usuario.sobrenome = request.POST.get('sobrenome')
-    usuario.email = request.POST.get('email')
-    usuario.recebe_notificacao = request.POST.get('recebe_notificacao') != None  # Convert to boolean
-    usuario.tipo_usuario = request.POST.get('tipo_usuario')
-    usuario.ra = request.POST.get('ra')
-    usuario.uc = request.POST.get('uc')
-    usuario.nome_projeto = request.POST.get('nome_projeto')
-    usuario.tema_trabalho = request.POST.get('tema_trabalho')
-    usuario.instituicao_matriz = request.POST.get('instituicao_matriz')
-    usuario.save()
+def cadastrar_usuario(request, id=None):
+    # Se tem ID, é edição. Se não, é cadastro novo
+    usuario = get_object_or_404(Usuario, pk=id) if id else None
+    
+    if request.method == 'POST':
+        # Se for edição, pega o usuário existente, senão cria novo
+        if not usuario:
+            usuario = Usuario()
+        
+        # Preenche os dados do formulário
+        usuario.nome = request.POST.get('nome')
+        usuario.sobrenome = request.POST.get('sobrenome')
+        usuario.email = request.POST.get('email')
+        usuario.recebe_notificacao = request.POST.get('recebe_notificacao') is not None
+        usuario.tipo_usuario = request.POST.get('tipo_usuario')
+        usuario.ra = request.POST.get('ra')
+        usuario.uc = request.POST.get('uc')
+        usuario.nome_projeto = request.POST.get('nome_projeto')
+        usuario.tema_trabalho = request.POST.get('tema_trabalho')
+        usuario.instituicao_matriz = request.POST.get('instituicao_matriz')
+        usuario.save()
 
-    return HttpResponseRedirect('cadastro_concluido')
-  else:
+        return HttpResponseRedirect(reverse('cadastro_concluido'))
+    
+    # Contexto para o template
     context = {
-      'tipos_usuarios': TipoUsuario.choices
+        'usuario': usuario,
+        'tipos_usuarios': TipoUsuario.choices,
+        'modo_edicao': id is not None  # Indica se está no modo edição
     }
     return render(request, 'usuarios/cadastro_usuarios.html', context)
-  
+
+def deletar_registro(request, id):
+    registro = get_object_or_404(Usuario, pk=id)
+    
+    if request.method == 'POST':
+        registro.delete()
+        return redirect('relatorio_usuarios')
+
+
 def cadastro_concluido(request):
   context = {
     'count_usuarios': Usuario.objects.count()
