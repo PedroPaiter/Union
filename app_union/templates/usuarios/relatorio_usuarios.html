@@ -73,6 +73,10 @@
             <td>{{ usuario.email }}</td>
             <td>{{ usuario.get_tipo_usuario_display }}</td>
             <td>
+              <a href="{% url 'editar_usuario' usuario.id %}" class="btn btn-sm btn-primary me-2">
+                <i class="bi bi-pencil"></i> Editar
+              </a> 
+
               <!-- Botão de deletar -->
               <form method="post" action="{% url 'deletar_registro' usuario.id %}" class="d-inline">
                 {% csrf_token %}
@@ -80,11 +84,8 @@
                         onclick="return confirm('Tem certeza que deseja deletar este usuário?')">
                   <i class="bi bi-trash"></i> Deletar
                 </button>
-              </form>
-              <a href="{% url 'editar_usuario' usuario.id %}" class="btn btn-sm btn-primary me-2">
-                <i class="bi bi-pencil"></i> Editar
-              </a>  
-                </td>
+              </form> 
+            </td>
           </tr>
           {% endfor %}
         </tbody>
